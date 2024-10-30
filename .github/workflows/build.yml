@@ -16,7 +16,7 @@ on:
       tiktok_version:
         description: "The version of TikTok"
         default: ""
-        required: false
+        required: true
         type: string
       bundle_id:
         description: "Modify the bundle ID. Not recommended"
@@ -97,12 +97,6 @@ jobs:
           mv ./*.sdk "${THEOS}/sdks"
         env:
           THEOS: ${{ github.workspace }}/theos
-
-      - name: Get BHTikTok Version
-        run: |
-          BHTIKTOK_VERSION=$(awk '/Version:/ {print $2}' main/control)
-          echo "BHTIKTOK_VERSION=${BHTIKTOK_VERSION}" >> "$GITHUB_ENV"
-          echo "$BHTIKTOK_VERSION"
 
       - name: Download TikTok iPA
         run: |
