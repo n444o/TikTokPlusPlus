@@ -5,7 +5,7 @@ on:
     inputs:
       bhtiktok_version:
         description: "The version of BHTikTok"
-        default: "0.0.1"
+        default: "1.5.0"
         required: true
         type: string
       decrypted_tiktok_url:
@@ -51,6 +51,12 @@ jobs:
         with:
           path: main
           submodules: recursive
+          
+      - name: Initialize and Update Submodules
+        run: |
+        git submodule init
+        git submodule update
+        working-directory: main
 
       - name: Install Dependencies
         run: brew install ldid dpkg make
