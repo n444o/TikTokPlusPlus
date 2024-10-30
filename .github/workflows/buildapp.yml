@@ -50,7 +50,7 @@ jobs:
         uses: actions/checkout@v3.5.3
         with:
           path: main
-          submodules: recursive
+          submodules: false
           
       - name: Initialize and Update Submodules
         run: |
