@@ -47,19 +47,14 @@ jobs:
 
     steps:
       - name: Checkout Main
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v4
         with:
           path: main
+          ref: ${{ github.event.inputs.commit_id || github.ref }}
           submodules: recursive
-          
-      - name: Initialize and Update Submodules
-        run: |
-         git submodule init
-         git submodule update
-        working-directory: main
 
       - name: Install Dependencies
-        run: brew install ldid dpkg make
+        run: brew install make dpkg ldid
 
       - name: Set PATH environment variable
         run: echo "$(brew --prefix make)/libexec/gnubin" >> $GITHUB_PATH 
@@ -85,7 +80,7 @@ jobs:
           path: theos/sdks/
           key: ${{ env.cache-name }}
           restore-keys: ${{ env.cache-name }}
-      
+
       - name: Download iOS SDK
         if: steps.SDK.outputs.cache-hit != 'true'
         run: |
