@@ -82,21 +82,25 @@ jobs:
           restore-keys: ${{ env.cache-name }}
 
       - name: Download iOS SDK
-        if: steps.SDK.outputs.cache-hit != 'true'
-        run: |
-         git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks sdks
-         cd sdks
-         git sparse-checkout init --cone
-         git sparse-checkout set iPhoneOS${{ inputs.sdk_version }}.sdk
-         git checkout
-         if [ -f iPhoneOS${{ inputs.sdk_version }}.sdk ]; then
-         mv iPhoneOS${{ inputs.sdk_version }}.sdk "${THEOS}/sdks/"
-         else
-         echo "SDK file not found. Creating an empty .sdk file."
-         touch "${THEOS}/sdks/iPhoneOS${{ inputs.sdk_version }}.sdk"
-         fi
-        env:
-         THEOS: ${{ github.workspace }}/theos
+  if: steps.SDK.outputs.cache-hit != 'true'
+  run: |
+    git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks sdks
+    cd sdks
+    git sparse-checkout init --cone
+    git sparse-checkout set iPhoneOS${{ inputs.sdk_version }}.sdk
+    git checkout
+
+    echo "Contents of sdks directory after sparse-checkout:"
+    ls -al
+
+    if [ -f iPhoneOS${{ inputs.sdk_version }}.sdk ]; then
+      mv iPhoneOS${{ inputs.sdk_version }}.sdk "${THEOS}/sdks/"
+    else
+      echo "SDK file not found. Creating an empty .sdk file."
+      touch "${THEOS}/sdks/iPhoneOS${{ inputs.sdk_version }}.sdk"
+    fi
+  env:
+    THEOS: ${{ github.workspace }}/theos
 
       - name: Download TikTok iPA
         run: |
