@@ -81,17 +81,8 @@ jobs:
           key: ${{ env.cache-name }}
           restore-keys: ${{ env.cache-name }}
 
-      - name: Cache iOS SDK
-        id: SDK
-        uses: actions/cache@v3
-        with:
-          path: theos/sdks/
-          key: iOS-${{ inputs.sdk_version }}-SDK
-          restore-keys: |
-            iOS-${{ inputs.sdk_version }}-SDK
-
       - name: Download iOS SDK
-  if: steps.SDK.outputs.cache-hit != 'false'
+  if: steps.SDK.outputs.cache-hit != 'true'
   run: |
     git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks sdks
     cd sdks
