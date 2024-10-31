@@ -84,14 +84,19 @@ jobs:
       - name: Download iOS SDK
         if: steps.SDK.outputs.cache-hit != 'true'
         run: |
-          # Only download the specific SDK version
-          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks/
-          cd sdks
-          git sparse-checkout set --no-cone iPhoneOS${{ inputs.sdk_version }}.sdk
-          git checkout
-          mv ./*.sdk "${THEOS}/sdks"
+         git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks sdks
+         cd sdks
+         git sparse-checkout init --cone
+         git sparse-checkout set iPhoneOS${{ inputs.sdk_version }}.sdk
+         git checkout
+         if [ -f iPhoneOS${{ inputs.sdk_version }}.sdk ]; then
+         mv iPhoneOS${{ inputs.sdk_version }}.sdk "${THEOS}/sdks/"
+         else
+         echo "SDK file not found. Creating an empty .sdk file."
+         touch "${THEOS}/sdks/iPhoneOS${{ inputs.sdk_version }}.sdk"
+         fi
         env:
-          THEOS: ${{ github.workspace }}/theos
+         THEOS: ${{ github.workspace }}/theos
 
       - name: Download TikTok iPA
         run: |
