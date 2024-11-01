@@ -3,6 +3,7 @@ name: Build and Release BHTikTokPlus
 on:
   workflow_dispatch:
     inputs:
+      bhtiktok_version:
       decrypted_tiktok_url:
         description: "The direct URL to the decrypted TikTok ipa"
         default: ""
