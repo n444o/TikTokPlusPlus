@@ -3,6 +3,11 @@ name: Build and Release BHTikTokPlus
 on:
   workflow_dispatch:
     inputs:
+      sdk_version:
+        description: "iOS SDK Version"
+        default: "16.5"
+        required: true
+        type: string
       bhtiktok_version:
       decrypted_tiktok_url:
         description: "The direct URL to the decrypted TikTok ipa"
@@ -53,6 +58,7 @@ jobs:
         run: brew install make dpkg ldid
 
       - name: Set PATH environment variable
+        run: |
           echo "$(brew --prefix make)/libexec/gnubin" >> "$GITHUB_PATH"
 
       - name: Download Theos
