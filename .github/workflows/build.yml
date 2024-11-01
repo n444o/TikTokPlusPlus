@@ -86,8 +86,11 @@ jobs:
         if: steps.SDK.outputs.cache-hit != 'false'
         run: |
           # Only download the specific SDK version
-          git clone https://github.com/theos/sdks.git
-          mv *.sdk $THEOS/sdks
+          git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks/
+          cd sdks
+          git sparse-checkout set --no-cone iPhoneOS${{ inputs.sdk_version }}.sdk
+          git checkout
+          mv ./*.sdk "${{ github.workspace }}/sdks"
         env:
           THEOS: ${{ github.workspace }}/theos
 
