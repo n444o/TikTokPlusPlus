@@ -86,7 +86,7 @@ jobs:
         if: steps.SDK.outputs.cache-hit != 'false'
         run: |
           # Only download the specific SDK version
-          svn checkout -q https://github.com/theos/sdks/
+          git clone https://github.com/theos/sdks.git
           mv *.sdk $THEOS/sdks
         env:
           THEOS: ${{ github.workspace }}/theos
