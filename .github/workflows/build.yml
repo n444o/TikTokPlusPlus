@@ -127,13 +127,11 @@ jobs:
           APP_NAME: ${{ inputs.app_name }}
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3.1.1
-        env:
-          BHTIKTOK_VERSION: ${{ inputs.bhtiktok_version }}
-          TIKTOK_VERSION: ${{ inputs.tiktok_version }}
+        if: ${{ inputs.upload_artifact }}
+        uses: actions/upload-artifact@v4
         with:
-          name: BHTikTokPlus_${{ env.TIKTOK_VERSION }}_${{ env.BHTIKTOK_VERSION }}
-          path: ${{ github.workspace }}/main/packages/${{ steps.build_package.outputs.package }}
+          name: BHTwitter_${{ env.BHTWITTER_VERSION }}
+          path: ${{ github.workspace }}/main/packages/${{ steps.package_name.outputs.package }}
           if-no-files-found: error
 
       - name: Create Release
