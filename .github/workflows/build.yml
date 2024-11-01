@@ -3,9 +3,9 @@ name: Build and Release BHTikTokPlus
 on:
   workflow_dispatch:
     inputs:
-      bhtiktok_version:
-        description: "The version of BHTikTok"
-        default: "1.5.0"
+      sdk_version:
+        description: "iOS SDK Version"
+        default: "16.5"
         required: true
         type: string
       decrypted_tiktok_url:
@@ -16,7 +16,7 @@ on:
       tiktok_version:
         description: "The version of TikTok"
         default: ""
-        required: true
+        required: false
         type: string
       bundle_id:
         description: "Modify the bundle ID. Not recommended"
@@ -47,53 +47,42 @@ jobs:
 
     steps:
       - name: Checkout Main
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v4
         with:
           path: main
+          ref: ${{ github.event.inputs.commit_id || github.ref }}
           submodules: recursive
 
       - name: Install Dependencies
-        run: brew install ldid dpkg make
+        run: brew install make dpkg ldid
 
       - name: Set PATH environment variable
-        run: echo "$(brew --prefix make)/libexec/gnubin" >> $GITHUB_PATH 
+          echo "$(brew --prefix make)/libexec/gnubin" >> "$GITHUB_PATH"
 
-      - name: Setup Theos
-        uses: actions/checkout@v3.5.3
+      - name: Download Theos
+        uses: actions/checkout@v4
         with:
           repository: theos/theos
-          ref: 3da31488281ecf4394d10302d2629607f4a1aa07
+          ref: master
           path: theos
           submodules: recursive
       
-      - name: Caching
+      - name: iOS SDK Caching
         id: SDK
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v4
         env:
-          cache-name: iOS-15.5-SDK
+          cache-name: iOS-${{ inputs.sdk_version }}-SDK
         with:
           path: theos/sdks/
           key: ${{ env.cache-name }}
+          restore-keys: ${{ env.cache-name }}
       
-      - name: Download iOS 15.5 SDK
+      - name: Download iOS SDK
         if: steps.SDK.outputs.cache-hit != 'true'
         run: |
-          svn checkout -q https://github.com/chrisharper22/sdks/trunk/iPhoneOS15.5.sdk
+          # Only download the specific SDK version
+          svn checkout -q https://github.com/theos/sdks/
           mv *.sdk $THEOS/sdks
-        env:
-          THEOS: ${{ github.workspace }}/theos
-
-      - name: Setup Theos Jailed
-        uses: actions/checkout@v3.5.3
-        with:
-          repository: qnblackcat/theos-jailed
-          ref: master
-          path: theos-jailed
-          submodules: recursive
-
-      - name: Install Theos Jailed
-        run: |
-          ./theos-jailed/install
         env:
           THEOS: ${{ github.workspace }}/theos
 
