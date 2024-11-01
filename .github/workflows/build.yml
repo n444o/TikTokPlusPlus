@@ -60,6 +60,9 @@ jobs:
         run: |
           echo "$(brew --prefix make)/libexec/gnubin" >> "$GITHUB_PATH"
 
+      - name: Ensure SDK Directory Exists
+        run: mkdir -p theos/sdks
+
       - name: Download Theos
         uses: actions/checkout@v4
         with:
@@ -75,22 +78,23 @@ jobs:
           cache-name: iOS-${{ inputs.sdk_version }}-SDK
         with:
           path: theos/sdks/
-          key: ${{ env.cache-name }}
-          restore-keys: ${{ env.cache-name }}
+          key: iOS-SDK-${{ inputs.sdk_version }}-SDK
+          restore-keys: iOS-SDK-${{ inputs.sdk_version }}-SDK
       
       - name: Install SVN
         run: |
           brew install svn
 
       - name: Download iOS SDK
-        if: steps.SDK.outputs.cache-hit != 'false'
+        if: steps.SDK.outputs.cache-hit != 'true'
         run: |
           # Only download the specific SDK version
           git clone -n --depth=1 --filter=tree:0 https://github.com/theos/sdks/
           cd sdks
           git sparse-checkout set --no-cone iPhoneOS${{ inputs.sdk_version }}.sdk
           git checkout
-          mv ./*.sdk "${{ github.workspace }}/sdks"
+          mkdir -p "${THEOS}/sdks"
+          mv ./*.sdk "${THEOS}/sdks/"
         env:
           THEOS: ${{ github.workspace }}/theos
 
