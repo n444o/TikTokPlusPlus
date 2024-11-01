@@ -134,16 +134,14 @@ jobs:
           path: ${{ github.workspace }}/main/packages/${{ steps.package_name.outputs.package }}
           if-no-files-found: error
 
-      - name: Create Release
+      - name: Create Draft Release
+        if: ${{ inputs.create_release }}
         id: create_release
-        uses: softprops/action-gh-release@v0.1.15
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BHTIKTOK_VERSION: ${{ inputs.bhtiktok_version }}
-          TIKTOK_VERSION: ${{ inputs.tiktok_version }}
-          DRAFT: ${{ inputs.create_release }}
         with:
-          tag_name: v${{ env.TIKTOK_VERSION }}-${{ env.BHTIKTOK_VERSION }}-(${{ github.run_number }})
-          name: v${{ env.TIKTOK_VERSION }}-${{ env.BHTIKTOK_VERSION }}-(${{ github.run_number }})
-          files: main/packages/*.ipa
-          draft: ${{ env.DRAFT }}
+          tag_name: v${{ env.BHTWITTER_VERSION }}
+          name: v${{ env.BHTWITTER_VERSION }} - BHTwitter
+          files: main/packages/${{ steps.package_name.outputs.package }}
+          draft: true
