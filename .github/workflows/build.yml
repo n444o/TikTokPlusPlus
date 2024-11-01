@@ -8,7 +8,6 @@ on:
         default: "16.5"
         required: true
         type: string
-      bhtiktok_version:
       decrypted_tiktok_url:
         description: "The direct URL to the decrypted TikTok ipa"
         default: ""
@@ -79,6 +78,11 @@ jobs:
           key: ${{ env.cache-name }}
           restore-keys: ${{ env.cache-name }}
       
+      - name: Install SVN
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y subversion
+
       - name: Download iOS SDK
         if: steps.SDK.outputs.cache-hit != 'false'
         run: |
