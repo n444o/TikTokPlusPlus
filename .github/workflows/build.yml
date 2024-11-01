@@ -98,9 +98,29 @@ jobs:
         env:
           THEOS: ${{ github.workspace }}/theos
 
+      - name: Setup Theos Jailed
+        uses: actions/checkout@v3.2.0
+        with:
+          repository: qnblackcat/theos-jailed
+          ref: master
+          path: theos-jailed
+          submodules: recursive
+
+      - name: Install Theos Jailed
+        run: |
+          ./theos-jailed/install
+        env:
+          THEOS: ${{ github.workspace }}/theos
+
       - name: Download TikTok iPA
         run: |
           wget "$TIKTOK_URL" --no-verbose -O main/TikTok.ipa && echo -e "==> \033[1mTikTok v${{ inputs.tiktok_version }} downloaded! \033[0m"
+
+      - name: Prepare TikTok iPA
+        run: |
+          curl "https://raw.githubusercontent.com/Muirey03/RemoteLog/master/RemoteLog.h" --output "$THEOS/include/RemoteLog.h"
+          wget "$TIKTOK_URL" --no-verbose -O main/TikTok.ipa && echo -e "==> \033[1mTikTok v${{ inputs.tiktok_version }} downloaded! \033[0m"
+          unzip -q ./main/TikTok.ipa -d ./main/tmp
 
         env:
           THEOS: ${{ github.workspace }}/theos
@@ -114,14 +134,14 @@ jobs:
           sed -i '' "27s#.*#BUNDLE_ID = ${{ env.BUNDLE_ID }}#g" Makefile
           sed -i '' "26s#.*#DISPLAY_NAME = ${{ env.APP_NAME }}#g" Makefile          
           make package IPA=TikTok.ipa FINALPACKAGE=1
-          (mv "packages/$(ls -t packages | head -n1)" "packages/BHTiktokPlus_${{ env.TIKTOK_VERSION  }}_${{ env.BHTIKTOK_VERSION }}.ipa")
+          (mv "packages/$(ls -t packages | head -n1)" "packages/TikTokPlus_${{ env.TIKTOK_VERSION  }}_${{ env.TIKTOKPLUS_VERSION }}.ipa")
           echo "package=$(ls -t packages | head -n1)" >>$GITHUB_OUTPUT
           echo -e "==> \033[1mSHASUM256: $(shasum -a 256 packages/*.ipa | cut -f1 -d' ')\033[0m"
           echo -e "==> \033[1mBundle ID: ${{ env.BUNDLE_ID }}\033[0m"
-
+          
         env:
           THEOS: ${{ github.workspace }}/theos
-          BHTIKTOK_VERSION: ${{ inputs.bhtiktok_version }}
+          TIKTOKPLUS_VERSION: ${{ inputs.tiktokplus_version }}
           TIKTOK_VERSION: ${{ inputs.tiktok_version }}
           BUNDLE_ID: ${{ inputs.bundle_id }}
           APP_NAME: ${{ inputs.app_name }}
@@ -129,9 +149,12 @@ jobs:
       - name: Upload Artifact
         if: ${{ inputs.upload_artifact }}
         uses: actions/upload-artifact@v4
+        env:
+          TIKTOKPLUS_VERSION: ${{ inputs.tiktokplus_version }}
+          TIKTOK_VERSION: ${{ inputs.tiktok_version }}
         with:
-          name: BHTwitter_${{ env.BHTWITTER_VERSION }}
-          path: ${{ github.workspace }}/main/packages/${{ steps.package_name.outputs.package }}
+          name: TikTokPlus_${{ env.TIKTOK_VERSION }}_${{ env.TIKTOKPLUS_VERSION }}
+          path: ${{ github.workspace }}/main/packages/${{ steps.build_package.outputs.package }}
           if-no-files-found: error
 
       - name: Create Draft Release
@@ -140,8 +163,13 @@ jobs:
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TIKTOKPLUS_VERSION: ${{ inputs.tiktokplus_version }}
+          TIKTOK_VERSION: ${{ inputs.tiktok_version }}
+          DRAFT: ${{ inputs.create_release }}
         with:
-          tag_name: v${{ env.BHTWITTER_VERSION }}
-          name: v${{ env.BHTWITTER_VERSION }} - BHTwitter
+          tag_name: v${{ env.TIKTOK_VERSION }}-${{ env.TIKTOKPLUS_VERSION }}-(${{ github.run_number }})
+          name: v${{ env.TIKTOK_VERSION }}-${{ env.TIKTOKPLUS_VERSION }}-(${{ github.run_number }})
+          files: main/packages/*.ipa
+          draft: ${{ env.DRAFT }}
           files: main/packages/${{ steps.package_name.outputs.package }}
           draft: true
